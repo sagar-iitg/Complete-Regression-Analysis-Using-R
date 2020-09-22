@@ -1,0 +1,452 @@
+---
+title: "GLM_Assignment_1"
+output: html_document
+Author: "SAGAR KUMAR"
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+**SAGAR KUMAR**  
+**194161013**  
+**Data Science**
+
+
+**Importing Data**
+
+```{r}
+library("readxl")   ## Including library 
+concrete.data<-read_excel("Concrete_Data.xls") ##Importing Data
+concrete.data<-concrete.data[,-c(1)] ## Removing Id Column From data Set
+str(concrete.data)      
+```
+
+**Observation  of Concrete Data :**
+
+In Concrete dataset I removed The first column (ID Column)  
+Looking at the output we get to know that we have 1030 samples and 9  variables.
+
+All the predictor variables are of the numeric class.
+\newpage
+Now look at the summary of data to understand better.
+
+```{r}
+#summary of the Data
+summary(concrete.data)
+```
+
+Above summary gives us information about minimum,1st quartile,median,mean,3rd quartile,
+and Max.
+
+for example: Consider "Concrete compressive strength(MPa, megapascals)" Variable .
+ 
+Min.   : 2.332                                 
+1st Qu.:23.707                                 
+Median :34.443                                 
+Mean   :35.818                                 
+3rd Qu.:46.136                                 
+Max.   :82.599 
+
+
+
+To better understand the data and relationship between variable we are trying to find correlation between each variable.
+\newpage
+Correlation can have a value:
+
+1 is a perfect positive correlation,0   is no correlation (the values (variables) don't seem linked at all),-1  is a perfect negative correlation
+
+
+
+```{r}
+##correlation b/w each other(All Predictors)
+cor(concrete.data)
+```
+
+**Observation**
+
+No. predictors are strongly correlated to other predictors
+No. predictors are linear Combination of others.
+
+
+\newpage
+**Pair plot between variables**
+
+```{r}
+#Plot concrete data
+plot(concrete.data)
+```
+
+##Observation:
+
+Since we didn’t specify the x and y axes,R plots all the data against Each other.
+\newpage
+**Question 1**
+
+Fit a multiple linear regression to the above data considering all the input variables. The
+information of the output variable is given in the information file.?
+
+
+```{r}
+
+#Fit the model
+multiple.regression<-lm(`Concrete compressive strength(MPa, megapascals)`~.,data=concrete.data)
+summary(multiple.regression)
+
+```
+
+
+
+**Question2**
+
+Explain the results obtained from the statistical software along with the diagnostic results/plots. I expect your explanation to be detailed along with interpretations.
+
+
+
+
+
+```{r}
+
+summary(multiple.regression$residuals)  #Summary of Residual
+mean(multiple.regression$residuals)   ## Expected value of the residulas.
+var(multiple.regression$residuals)   ## Variance of the residulas
+
+```
+
+Residuals are essentially the difference between the actual observed response values and the response values that the model predicted.
+
+
+from summary of the Residuals we can see that the distribution of the residuals is somewhat symmetry.
+**max=34.662 ,min=-28.65,and mean=0**
+
+Linear regression makes several assumptions about the Residuals(Errors), such as :
+
+1.The errors are uncorrelted with each other.Violation of this assumption can lead to very misleading assesments of the strength of the regression.
+2.The expected value of errors is zero.
+3.The assumption of homoscedasity.(Constant Variance)
+4.Distribution of errors (Residulals) follows normal distribution.
+
+Expected value(mean) of the residulas is: -1.065868e-15 (it means residuals expected value is almost zero ) which satisfy our assumption.
+Variance of the residulas is: 107.316
+
+
+
+I mentioned that the residuals follow a normal distribution. 
+let's check whether residuals follows normal distribution or not ?
+```{r}
+plot(density(multiple.regression$residuals))   ##Density plot of residual
+
+```
+
+We can clearly see that the residuals follows Approximatley  normal, but is a multi modal normal distribution which indicates that our model is not very good.
+
+
+```{r}
+coef(multiple.regression)
+```
+
+**Coefficient Estimate :**
+
+This is the expected change in Y per unit change in X. In our model, one unit change in Cement contributes to 0.11978526  unit change in Concrete compressive strength(MPa, megapascals) . Same is the case for other variables as well.
+
+If the estimate value is 0.0 ,it means it adds no significance to the model and is considered worthless.
+
+
+```{r}
+summary(multiple.regression)
+```
+
+
+
+
+**Interpreting P-Values for Variables in a Regression Model**
+The p-values help determine whether the relationships that you observe in your sample also exist in the larger population. The p-value for each independent variable tests the null hypothesis that the variable has no correlation with the dependent variable. If there is no correlation, there is no association between the changes in the independent variable and the shifts in the dependent variable. In other words, there is insufficient evidence to conclude that there is effect at the population level.
+
+Lower the p value allow us to reject null hypothesis.i.e the estimate of any explanatory variable is 0 or there is no relationship between the predictor and the response. Asterisks mark aside p value define significance of value, lower the value ,higher is its significance and higher is the number of asterisks. Hence, if we see a small p-value, then we can infer that there is an association between the predictor and the response. We reject the null hypothesis—that is, we declare a relationship to exist between X and Y —if the p-value is small enough
+
+Typically, a p-value of 5% or less is a good cut-off point.
+
+A small p-value indicates that there is a relationship between the predictor and response variables
+
+In our dataset, Cement , Blast Furnace Slag, Fly Ash ,Water,Age and Superplasticizer  are the significant variables .
+
+Insignificant Variables are:Superplasticizer (component 5)(kg in a m^3 mixture),Fine Aggregate (component 7)(kg in a m^3 mixture)    
+
+
+**Interpreting Regression Coefficients for Linear Relationships**
+The sign of a regression coefficient tells you whether there is a positive or negative correlation between each independent variable the dependent variable. A positive coefficient indicates that as the value of the independent variable increases, the mean of the dependent variable also tends to increase. A negative coefficient suggests that as the independent variable increases, the dependent variable tends to decrease.
+
+In our model only **water(predictor)** has a negative coefficient and rest all the coefficients are positive.
+
+
+**Standard error**
+
+The standard deviation of an estimate is called the standard error. The standard error of the coefficient measures how precisely the model estimates the coefficient’s unknown value. Lower the error, better the estimate.
+
+The coefficient Standard Error measures the average amount that the coefficient estimates vary from the actual.
+
+We expect minimum value of standard error.
+
+Total we have 1030 observations and 9 variable so removing 9 data points (1030-9) = 1021 degrees of freedom.
+
+**Multiple R-squared**
+
+R-square is a goodness-of-fit measure for linear regression models. It determines the percentage of variation in the response variable that is explained by variation in the explanatory variable. this is use to calculate how well the model is doing to explain the things.R-squared evaluates the scatter of the data points around the fitted regression line. Higher the values of R-square are desirables."How high is High" depends on the context.
+
+It always lies between 0 and 1 (i.e.: a number near 0 represents a regression that does not explain the variance in the response variable well and a number close to 1 does explain the observed variance in the response variable).
+
+In our model the Value of R-square is : 0.6155
+
+**Adjusted R-squared**
+
+The adjusted Rsquared increase only if the new terms improves the model more than would be expected by chance.
+
+It decreases when a predictor improves the model by less then expected by chance.The adjusted Rsquared can be negative but it's usually not. It is always lower than The R-squared.
+
+In our Model the value of Adjusted Rsquare is:0.6125
+
+**F-Statistic:**
+
+F-statistic is a good indicator of whether there is a relationship between our predictor and the response variables. We can also say that if there is greater relationship then our modelis good and not good otherwise. It tells us whether the modelis significant or not. The model is significant if any of the coefficients are
+non-zero.
+
+**Diagnostic Plot**
+
+```{r}
+par(mfrow=c(2,2))
+plot(multiple.regression)
+```
+
+
+**Residual vs Fitted**
+
+It is used to check the linear relationship  assumptions.We expect a horizontal lines without distinct patterns.
+
+It is also used to check the assumption of constant variance of  errors.We expect the scatter should be symmetric vertically (along y-axis) about zero.
+
+In our model As expected Scatter  plot which is shown is Vertical symmetric.and there is no  distinctive pattern
+
+
+**Normal QQ**
+
+Normal Q-Q Plot” provides a graphical way to determine the level of normality. The black line indicates the
+values your sample should adhere to if the distribution was normal. The dots are your actual data. 
+
+If the dots fall exactly on the black line, then your data are normal
+
+It’s good if residuals are lined well on the straight dashed line
+
+In our models almost all the data's are normally distributed.
+
+**Scale Location**
+Scale Location(Or Spread Location) is used to check the homoscedasticity assumption (Homogenity of Variance of the Residuals ).We expect a Horizontal line with equally spread points.
+
+Horizontal line with equally spread points is a good indication of homoscedasticity. This is not the case in our example, where we have a heteroscedasticity problem.
+
+**Residuals V/s leverage**
+It is used to identify infulential Observations.Here we don't expect  any pattern.
+In this plot,The dotted red lines known's as the cook's distance. We check for the points that are outside dotted  line on top right or bottom right corner.If any Point falls in that region,we say that observations might influence the regression results when included or excluded from the analysis.
+
+In our model : No points are on top right or bottom right corner of the Graph so there is no influenctial points.
+
+
+**Question3**
+
+Based on your diagnostics plots' interpretations, do you want to recommend any changes in the model? If so do the changes along with the reasons and fit the model again. If no change required then support your arguments.?
+
+
+```{r}
+
+#Fit the model
+multiple.regression1<-lm(`Concrete compressive strength(MPa, megapascals)`~.-1,data=concrete.data)
+summary(multiple.regression1)
+
+```
+
+
+Given Domain knowledge if one has zero input (predictors) then the output (response) must be zero. But as predicted by our model the intercept is -23.163756 and the p-value is 0.383851  which is insignificant. So now  after removing  the model has improved before removing the intercept all the variables where not significant but now each one  of them are significant.
+
+And Value of RSquare is:0.9313
+
+
+
+**Question 4**
+
+In the same email, you will get another data as "add columns". Merge this new data with the previous data. Now fit a multiple linear regression on the merged data with all the input variables. Explain your results. Comment on the newly added variables and whether you want to keep them in the model or not. Justify your answer in either case.?
+
+
+**Importing Data**
+
+```{r}
+concrete.data_new<-read.csv("C:\\Users\\Sagar\\Desktop\\GLM Assignment\\Concrete_Data_Add Column.csv")
+concrete.data_new<-concrete.data_new[,(-c(1))] ## Removing Id Column From data Set
+str(concrete.data_new)
+```
+
+
+**Observation  of Concrete Data :**
+
+Looking at the output we get to know that we have 1030 samples and 11  variables.(2 new predictor added)
+
+All the predictor variables are of the numeric class.
+
+Now look at the summary of data to understand better.
+
+```{r}
+summary(concrete.data_new)
+```
+
+Above summary gives us information about minimum,1st quartile,median,mean,3rd quartile,
+and Max.
+
+for example: Consider "new_input.1" Variable .
+ 
+Min.   : 2074                                 
+1st Qu.:3457                                 
+Median :4081                                 
+Mean   :4013                                 
+3rd Qu.:4419                                 
+Max.   :6679 
+
+
+
+```{r}
+cor(concrete.data_new)
+```
+
+
+By observing the predictor Variables  we can see that there is strong coorelation between 
+cement  (component 1)(kg in a m^3 mixture) and new_input.2 (0.99999) almost one.
+
+```{r}
+
+multiple.regression_new<-lm(Concrete.compressive.strength.MPa..megapascals..~.,data=concrete.data_new)
+summary(multiple.regression_new)
+
+```
+
+
+When we are adding Two new Variables(new_input.1,new_input.2) then significant variables are Blast Furnance,
+Fly ash ,super Plasticizer,Age.
+
+We don't want to keep  newely added Variables(new_input.1,new_input.2) because both variables are insignificant. when we are adding to the model.
+
+we can see that  Value of R-square is : 0.6155. and value of Adjusted Rsquare is:0.6118 .
+we can see that by adding this two new variable value of adjusted RSquare decreses.
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(multiple.regression_new)
+```
+
+
+
+**Question 5**
+
+You have decided that you will only allow three input variables in the model to make it simple. Choose the most appropriate three input variables and justify your answer along with results.?
+
+
+**subsets selection**
+
+```{r}
+
+library(leaps)
+best.fit <-regsubsets(Concrete.compressive.strength.MPa..megapascals..~.,data=concrete.data_new,nvmax=3)
+reg.summary=summary(best.fit)
+reg.summary
+
+```
+
+Subset selection refers to the task of finding a small number of the available independant
+variables that does a good job of predicting the dependant variables.
+
+Exhaustive search of good model is possible when we have upto 15 independant variables. After that we
+need to use searching algorithm like forward selection and backward elimination.
+
+We are making best subset selection on the entire dataset with a maximum of 3 variables and fitting the model for different subsets.  
+
+In the summary of the model we can see Forced In and Forced Out for all 10 variables except Response Variable (output variable).This tells us if are setting any variable to forcefully include into the model or forcefully exculde out of the model.  
+
+If we set any variable Force In as TRUE that will definetely be included into the model and setting Force Out to TRUE will exclude the variable from the model.
+
+Three best predictor variable : **new_input.2,superplasticizer,Age(day).**
+
+```{r}
+par(mfrow=c(2,2))
+plot(reg.summary$rss,xlab="no. of variables",ylab="RSS",type="l")
+plot(reg.summary$adjr2,xlab="no. of variables",ylab="Adjusted Rsquared",type="l")
+which.max(reg.summary$adjr2)
+
+
+
+plot(best.fit,scale="r2")
+plot(best.fit,scale="adjr2")
+plot(best.fit,scale="Cp")
+plot(best.fit,scale="bic")
+```
+
+
+**Forward Selection**
+
+```{r}
+library(leaps)
+forward.fit <-regsubsets(Concrete.compressive.strength.MPa..megapascals..~.,data=concrete.data_new,method="forward",nvmax=3)
+regfit<-summary(forward.fit)
+regfit
+```
+
+In this approach we start with a null model i.e. it does not have any input variables.
+Then, at every step we add a one new independant variable which helps us to best fit the data.
+This process is repeated multiple times.
+
+Three best predictor variable : **new_input.2,superplasticizer,Age(day).**
+
+```{r}
+regfit$rsq
+```
+
+
+```{r}
+plot(regfit$rss ,xlab="Number of Variables ",ylab="RSS", type="l")
+```
+As no of predictor increases RSS decreases(As Expected)
+
+
+**Backward Regression**
+
+
+```{r}
+library(leaps)
+backward.fit <-regsubsets(Concrete.compressive.strength.MPa..megapascals..~.,data=concrete.data_new,method="backward",nvmax=3)
+summary(backward.fit)
+```
+
+In this approach we start with a full model i.e. it does fits all input variables.
+Then, at every step we remove a one independant variable which is least important in determining the output variable. This process is repeated multiple times.
+
+
+Three best predictor variable : **cement,water,Age(day).**
+
+
+
+Let's fit the model  with the best three input variables.
+
+```{r}
+#Forward and Best Subset
+best1<-lm(Concrete.compressive.strength.MPa..megapascals..~new_input.2+Age..day.+Superplasticizer..component.5..kg.in.a.m.3.mixture.,data=concrete.data_new)
+summary(best1)
+
+
+```
+
+Rsquare is 0.4818
+
+Adjusted Rsquare is 0.4802
+
+All the Predictors are Significant.
+
+
